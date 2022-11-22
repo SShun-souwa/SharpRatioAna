@@ -1,6 +1,11 @@
 import pandas as pd
 import math
 import statistics
+import os
+
+# 計算結果を出力するディレクトリを確認、無い場合は作成
+if not os.path.exists("CalcData"):
+    os.mkdir("CalcData")
 
 # 各株価指数のCSVファイルをデータフレーム型で読み込み、株価指数名はkeyとする辞書を作成する
 
@@ -14,7 +19,7 @@ for i in stock_index_list:
     index_data_dict[i] = data_input
 
 
-# 指定した日付の間のデータを抽出し、新たなデータフレームとして返す関数
+# 指定した日付の間のデータを抽出し、新たなデータフレームとして戻す
 
 def extract_data(dataframe, days):
     temp_df = dataframe.query(str(days[0]) + "< date < " + str(days[1]))
@@ -23,24 +28,32 @@ def extract_data(dataframe, days):
     return temp_df
 
 
-df = extract_data(index_data_dict["NI225"], [20210110, 20210130])
-close_list = df["close"].tolist()
+# クローズプライスのリストからリターンとヒストリカルボラティリティの比を計算し、結果をリスト化して戻す
+def calc_return_vi_ratio(close_price_list):
+    return_day_list = [0]
+    return_vi_ratio_list = []
 
-def calc_sharpratio(close_list):
-    dayreturn_list = [0]
-    sharpratio_list = [0]
+    for k in range(0, len(close_price_list)):
+        if k >= 1:
+            # 前日終値とのログリターンを計算し、リスト化
+            return_day = math.log(close_price_list[k] / close_price_list[k - 1])
+            return_day_list.append(return_day)
+        # 算出開始日から3日以降(3日以前は0)のヒストリカルボラティリティを計算し、算出開始日から当日までのリターンから除算し、リスト化
+        if k > 2:
+            historical_vi = math.sqrt(statistics.stdev(return_day_list[0:k] * 250)) * 100
+            return_vi_ratio = (close_price_list[k] / close_price_list[0] * 100 - 100) / historical_vi
+            return_vi_ratio_list.append(return_vi_ratio)
+        else:
+            return_vi_ratio_list.append(0)
+    return return_vi_ratio_list
 
-    for i in range (0,len(close_list)):
-        if (i >= 1) :
-            dayreturn = math.log(close_list[i]/close_list[i-1])
-            dayreturn_list.append(dayreturn)
 
-    return dayreturn_list
-
-
-d = calc_sharpratio(close_list)
-print(d)
-
-# x = math.e
-# x = math.log(x)
-# print(x)
+# 計算したい期間のリストを作成
+days_list = [[20210110, 20210130], [20210303, 20210425]]
+# インデックス毎に上記リストの期間を計算させ、CSVファイルに書き出す
+for i in index_data_dict.keys():
+    for j in days_list:
+        df = extract_data(index_data_dict[i], j)
+        close_list = df["close"].tolist()
+        df["ReturnViRatio"] = calc_return_vi_ratio(close_list)
+        df.to_csv("CalcData" + "//" + i + "-" + str(j[0]) + "-" + str(j[1]) + ".csv", index=False, encoding='cp932')
