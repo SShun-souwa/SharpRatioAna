@@ -24,7 +24,7 @@ for i in stock_index_list:
 # 指定した日付の間のデータを抽出し、新たなデータフレームとして戻す
 
 def extract_data(dataframe, days):
-    temp_df = dataframe.query(str(days[0]) + "< date < " + str(days[1]))
+    temp_df = dataframe.query(days[0] + "< date < " + days[1])
     temp_df = temp_df.sort_values("date")
     temp_df.reset_index(inplace=True, drop=True)
     return temp_df
