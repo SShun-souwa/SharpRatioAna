@@ -2,6 +2,7 @@ import pandas as pd
 import math
 import statistics
 import os
+from Modules import DateTimeSet
 
 # 計算結果を出力するディレクトリを確認、無い場合は作成
 if not os.path.exists("CalcData"):
@@ -56,4 +57,5 @@ for i in index_data_dict.keys():
         df = extract_data(index_data_dict[i], j)
         close_list = df["close"].tolist()
         df["ReturnViRatio"] = calc_return_vi_ratio(close_list)
+        df = DateTimeSet.change_dataframe_day(df,"date")
         df.to_csv("CalcData" + "//" + i + "-" + str(j[0]) + "-" + str(j[1]) + ".csv", index=False, encoding='cp932')
