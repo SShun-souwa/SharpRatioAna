@@ -17,6 +17,7 @@ for i in stock_index_list:
                              encoding="ms932", sep=",")
     data_input.set_axis(["date", "open", "high", "low", "close", "5MA_value", "25MA_value", "75MA_value",
                          "VWAP", "volume", "5MA_volume", "25MA_volume"], axis="columns", inplace=True)
+    data_input = DateTimeSet.change_dataframe_day(data_input, "date")
     index_data_dict[i] = data_input
 
 
@@ -50,12 +51,11 @@ def calc_return_vi_ratio(close_price_list):
 
 
 # 計算したい期間のリストを作成
-days_list = [[20210110, 20210130], [20210303, 20210425]]
+days_list = [[20220817, 20221124], [20221003, 20221124]]
 # インデックス毎に上記リストの期間を計算させ、CSVファイルに書き出す
 for i in index_data_dict.keys():
     for j in days_list:
         df = extract_data(index_data_dict[i], j)
         close_list = df["close"].tolist()
         df["ReturnViRatio"] = calc_return_vi_ratio(close_list)
-        df = DateTimeSet.change_dataframe_day(df,"date")
         df.to_csv("CalcData" + "//" + i + "-" + str(j[0]) + "-" + str(j[1]) + ".csv", index=False, encoding='cp932')
