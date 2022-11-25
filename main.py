@@ -3,6 +3,7 @@ import math
 import statistics
 import os
 from Modules import DateTimeSet
+import datetime
 
 # 計算結果を出力するディレクトリを確認、無い場合は作成
 if not os.path.exists("CalcData"):
@@ -24,7 +25,7 @@ for i in stock_index_list:
 # 指定した日付の間のデータを抽出し、新たなデータフレームとして戻す
 
 def extract_data(dataframe, days):
-    temp_df = dataframe.query(days[0] + "< date < " + days[1])
+    temp_df = dataframe[(days[0] <= dataframe["date"]) & (dataframe["date"] <= days[1])]
     temp_df = temp_df.sort_values("date")
     temp_df.reset_index(inplace=True, drop=True)
     return temp_df
@@ -51,7 +52,12 @@ def calc_return_vi_ratio(close_price_list):
 
 
 # 計算したい期間のリストを作成
-days_list = [[20220817, 20221124], [20221003, 20221124]]
+days_list = [
+             [datetime.date(2022, 8, 16), datetime.date(2022, 11, 24)],
+             [datetime.date(2022, 10, 3), datetime.date(2022, 11, 24)]
+             ]
+
+
 # インデックス毎に上記リストの期間を計算させ、CSVファイルに書き出す
 for i in index_data_dict.keys():
     for j in days_list:
