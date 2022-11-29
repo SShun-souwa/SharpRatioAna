@@ -64,4 +64,7 @@ for i in index_data_dict.keys():
         df = extract_data(index_data_dict[i], j)
         close_list = df["close"].tolist()
         df["ReturnViRatio"] = calc_return_vi_ratio(close_list)
+        # 日付毎に計算結果を出力するディレクトリを確認、無い場合は作成
+        if not os.path.exists("CalcData\\"+str(j[0]) + "-" + str(j[1])):
+            os.mkdir("CalcData\\"+str(j[0]) + "-" + str(j[1]))
         df.to_csv("CalcData" + "//" + i + "-" + str(j[0]) + "-" + str(j[1]) + ".csv", index=False, encoding='cp932')
