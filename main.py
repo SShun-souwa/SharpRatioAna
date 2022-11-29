@@ -4,10 +4,6 @@ import statistics
 import os
 from Modules import DateTimeSet
 import datetime
-import plotly
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 
 # 計算結果を出力するディレクトリを確認、無い場合は作成
 if not os.path.exists("CalcData"):
@@ -57,36 +53,18 @@ def calc_return_vi_ratio(close_price_list):
 
 # 計算したい期間のリストを作成
 days_list = [
-             [datetime.date(2022, 8, 16), datetime.date(2022, 11, 28)],
-             [datetime.date(2022, 10, 3), datetime.date(2022, 11, 28)]
+             [datetime.date(2022, 8, 16), datetime.date(2022, 11, 24)],
+             [datetime.date(2022, 10, 3), datetime.date(2022, 11, 24)]
              ]
 
 
 # インデックス毎に上記リストの期間を計算させ、CSVファイルに書き出す
-for j in days_list:
-    # 後にグラフに起こす際に再帰処理をかけるための辞書を作成
-    df_temp_dict = {}
-    for i in index_data_dict.keys():
+for i in index_data_dict.keys():
+    for j in days_list:
         df = extract_data(index_data_dict[i], j)
         close_list = df["close"].tolist()
         df["ReturnViRatio"] = calc_return_vi_ratio(close_list)
         # 日付毎に計算結果を出力するディレクトリを確認、無い場合は作成
         if not os.path.exists("CalcData\\"+str(j[0]) + "-" + str(j[1])):
             os.mkdir("CalcData\\"+str(j[0]) + "-" + str(j[1]))
-        # 上で作成したディレクトリに株価指数毎のCSVファイルを保存
-        df.to_csv("CalcData\\"+str(j[0]) + "-" + str(j[1]) + "//" + i + "-" + str(j[0]) + "-" + str(j[1]) + ".csv",
-                  index=False, encoding='cp932')
-        df_temp_dict[i] = df
-
-    # 以下はグラフへの描画処理
-    fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1)
-    # 指定期間内の指数毎のデータを一時保存先の辞書型から順番に取得し、axへ渡す
-    for k in index_data_dict.keys():
-        ax.plot('date', 'ReturnViRatio', data=df_temp_dict[k], label=k)
-    ax.legend()
-    plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=1))
-    current_dpi = mpl.rcParams['figure.dpi']
-    # 対応する期間のディレクトリへ画像ファイルとして出力
-    plt.savefig("CalcData\\"+str(j[0]) + "-" + str(j[1]) + "\\" + "graph.png", dpi=current_dpi * 2)
-
+        df.to_csv("CalcData" + "//" + i + "-" + str(j[0]) + "-" + str(j[1]) + ".csv", index=False, encoding='cp932')
