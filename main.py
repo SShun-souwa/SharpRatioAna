@@ -79,12 +79,14 @@ for j in days_list:
         df_temp_dict[i] = df
 
     # 以下はグラフへの描画処理
-    fig = plt.figure()
+    fig = plt.figure(figsize=(16, 9))
     ax = fig.add_subplot(1, 1, 1)
     # 指定期間内の指数毎のデータを一時保存先の辞書型から順番に取得し、axへ渡す
     for k in index_data_dict.keys():
         ax.plot('date', 'ReturnViRatio', data=df_temp_dict[k], label=k)
     ax.legend()
+    plt.xlabel("date")
+    plt.grid()
     plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=1))
     current_dpi = mpl.rcParams['figure.dpi']
     # 対応する期間のディレクトリへ画像ファイルとして出力
